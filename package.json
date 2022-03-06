@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "@eeacms/volto-react-table-widget: Volto add-on",
   "main": "src/index.js",
-  "author": "European Environment Agency: IDM2 A-Team",
+  "author": "European Environment Agency: CLMS Team",
   "license": "MIT",
   "homepage": "https://github.com/eea/volto-react-table-widget",
   "keywords": [
@@ -17,7 +17,9 @@
     "url": "git@github.com:eea/volto-react-table-widget.git"
   },
   "dependencies": {
-    "@plone/scripts": "*"
+    "@plone/scripts": "*",
+    "react-table": "*",
+    "react-papaparse": "*"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
@@ -39,8 +41,5 @@
     "i18n": "rm -rf build/messages && NODE_ENV=production i18n --addon",
     "cypress:run": "if [ -d ./project ]; then NODE_ENV=development ./project/node_modules/cypress/bin/cypress run; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress run; fi",
     "cypress:open": "if [ -d ./project ]; then NODE_ENV=development ./project/node_modules/cypress/bin/cypress open; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress open; fi"
-  }
-}
-n/cypress open; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress open; fi"
   }
 }

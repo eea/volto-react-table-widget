@@ -15,7 +15,9 @@
 [![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-react-table-widget-develop&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-react-table-widget-develop)
 
 
-[Volto](https://github.com/plone/volto) add-on
+[Volto](https://github.com/plone/volto) add-on to provide a [react-table](https://react-table.tanstack.com/) based widget for Volto to use it with fields with a large set of values. 
+
+The widget can be used like Volto's [ObjectListWidget](https://docs.voltocms.com/storybook/?path=/story/widgets-object-list-json--default&globals=measureEnabled:false), but it is more performant when you have a large set of values and provides CSV import and export using the powerwful [react-papaparse](https://www.npmjs.com/package/react-papaparse) library.
 
 ## Features
 
