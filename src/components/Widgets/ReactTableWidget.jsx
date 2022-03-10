@@ -38,6 +38,7 @@ const EditableCell = ({
 }) => {
   // We need to keep and update the state of the cell normally
   const [value, setValue] = React.useState(initialValue);
+  const [selected, setSelected] = React.useState(false);
 
   const onChange = (e) => {
     setValue(e.target.value);
@@ -45,6 +46,7 @@ const EditableCell = ({
 
   // We'll only update the external data when the input is blurred
   const onBlur = () => {
+    setSelected(false);
     updateMyData(index, id, value);
   };
 
@@ -53,7 +55,19 @@ const EditableCell = ({
     setValue(initialValue);
   }, [initialValue]);
 
-  return <input value={value} onChange={onChange} onBlur={onBlur} />;
+  return selected ? (
+    // eslint-disable-next-line jsx-a11y/no-autofocus
+    <input autoFocus value={value} onChange={onChange} onBlur={onBlur} />
+  ) : (
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={() => setSelected(true)}
+      onKeyDown={() => setSelected(true)}
+    >
+      {value}
+    </span>
+  );
 };
 
 const defaultColumn = {
@@ -156,6 +170,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
             style={{ width: '100px' }}
           />
         </span>{' '}
+        {/* eslint-disable-next-line jsx-a11y/no-onchange */}
         <select
           value={pageSize}
           onChange={(e) => {
@@ -173,14 +188,30 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
   );
 }
 
-function ReactDataTableWidget(props) {
+const ReactDataTableWidget = (props) => {
   // Set our editable cell renderer as the default Cell renderer
-  let { columns, items, csvexport, csvimport } = props;
+  let { schema, value, onChange, id, csvexport, csvimport } = props;
 
   const intl = useIntl();
-  const tablecolumns = React.useMemo(() => columns, [columns]);
+  const header_columns = schema.fieldsets[0].fields.map((field) => {
+    return { Header: schema.properties[field].title, accessor: field };
+  });
 
-  const [data, setData] = React.useState(() => items);
+  // Set our editable cell renderer as the default Cell renderer
+  const tablecolumns = React.useMemo(
+    () => [
+      {
+        Header: 'React table header',
+        columns: header_columns,
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  // const tablecolumns = React.useMemo(() => columns, [columns]);
+
+  const [data, setData] = React.useState(() => value);
   const [originalData] = React.useState(data);
   const [skipPageReset, setSkipPageReset] = React.useState(false);
 
@@ -190,7 +221,7 @@ function ReactDataTableWidget(props) {
   // When our cell renderer calls updateMyData, we'll use
   // the rowIndex, columnId and new value to update the
   // original data
-  const updateMyData = (rowIndex, columnId, value) => {
+  const updateMyData = (rowIndex, columnId, updateValue) => {
     // We also turn on the flag to not reset the page
     setSkipPageReset(true);
     setData((old) =>
@@ -198,23 +229,16 @@ function ReactDataTableWidget(props) {
         if (index === rowIndex) {
           return {
             ...old[rowIndex],
-            [columnId]: value,
+            [columnId]: updateValue,
           };
         }
         return row;
       }),
     );
-
-    // return items back to the component
-    items = items.map((row, index) => {
-      if (index === rowIndex) {
-        return {
-          ...items[rowIndex],
-          [columnId]: value,
-        };
-      }
-      return row;
-    });
+    const newvalue = value.map((v, i) =>
+      i !== rowIndex ? v : { ...v, [columnId]: updateValue },
+    );
+    onChange(id, newvalue);
   };
 
   // After data chagnes, we turn the flag back off
@@ -278,21 +302,21 @@ function ReactDataTableWidget(props) {
             let modifiedcount = newdata.length - newdatacount;
 
             setData(newdata);
-            props.value.items = newdata;
+            onChange(id, newdata);
             toast.success(
               <Toast
                 success
                 autoClose={5000}
-                content={
-                  (intl.formatMessage(messages.csv_file_imported_correctly) +
-                    ' ',
-                  +intl.formatMessage(messages.import_new_imported_item_count, {
+                content={`${intl.formatMessage(
+                  messages.csv_file_imported_correctly,
+                )} ${intl.formatMessage(
+                  messages.import_new_imported_item_count,
+                  {
                     count: newdatacount,
-                  }) + ' ',
-                  +intl.formatMessage(messages.import_modified_item_count, {
-                    count: modifiedcount,
-                  }))
-                }
+                  },
+                )} ${intl.formatMessage(messages.import_modified_item_count, {
+                  count: modifiedcount,
+                })}`}
               />,
             );
           }}
@@ -307,7 +331,7 @@ function ReactDataTableWidget(props) {
             <>
               <div>
                 <button type="button" {...getRootProps()}>
-                  intl.formatMessage(messages.import_csv_file)
+                  {intl.formatMessage(messages.import_csv_file)}
                 </button>
                 <div>{acceptedFile && acceptedFile.name}</div>
                 <button {...getRemoveFileProps()}>Remove</button>
@@ -326,6 +350,6 @@ function ReactDataTableWidget(props) {
       />
     </>
   );
-}
+};
 
 export default ReactDataTableWidget;
