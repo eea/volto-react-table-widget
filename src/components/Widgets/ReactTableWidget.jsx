@@ -1,16 +1,17 @@
-import React from 'react';
-import { useTable, usePagination } from 'react-table';
-import { useCSVReader, useCSVDownloader } from 'react-papaparse';
-import { Toast } from '@plone/volto/components';
-import { toast } from 'react-toastify';
-import { v4 as uuid } from 'uuid';
+import './react-table-widget.css';
+
+import { Button, Modal, Segment } from 'semantic-ui-react';
 import { defineMessages, useIntl } from 'react-intl';
 
+import { CSVLink } from 'react-csv';
+import EditableTable from './EditableTable';
+import React from 'react';
+import { Toast } from '@plone/volto/components';
+import { toast } from 'react-toastify';
+import { useCSVReader } from 'react-papaparse';
+import { v4 as uuid } from 'uuid';
+
 const messages = defineMessages({
-  template: {
-    id: 'Variation',
-    defaultMessage: 'Variation',
-  },
   csv_file_imported_correctly: {
     id: 'CSV file imported correctly',
     defaultMessage: 'CSV file imported correctly',
@@ -27,169 +28,25 @@ const messages = defineMessages({
     id: 'Import CSV file',
     defaultMessage: 'Import CSV file',
   },
+  export_csv_file: {
+    id: 'Export CSV file',
+    defaultMessage: 'Export CSV file',
+  },
+  undo_all_modifications: {
+    id: 'Undo all modifications',
+    defaultMessage: 'Undo all modifications',
+  },
+  undo_header: {
+    id: 'Undo',
+    defaultMessage: 'Undo',
+  },
+  undo_message: {
+    id: 'Undo message',
+    defaultMessage: 'Undo message',
+  },
 });
 
-// Create an editable cell renderer
-const EditableCell = ({
-  value: initialValue,
-  row: { index },
-  column: { id },
-  updateMyData, // This is a custom function that we supplied to our table instance
-}) => {
-  // We need to keep and update the state of the cell normally
-  const [value, setValue] = React.useState(initialValue);
-  const [selected, setSelected] = React.useState(false);
-
-  const onChange = (e) => {
-    setValue(e.target.value);
-  };
-
-  // We'll only update the external data when the input is blurred
-  const onBlur = () => {
-    setSelected(false);
-    updateMyData(index, id, value);
-  };
-
-  // If the initialValue is changed external, sync it up with our state
-  React.useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  return selected ? (
-    // eslint-disable-next-line jsx-a11y/no-autofocus
-    <input autoFocus value={value} onChange={onChange} onBlur={onBlur} />
-  ) : (
-    <span
-      role="button"
-      tabIndex={0}
-      onClick={() => setSelected(true)}
-      onKeyDown={() => setSelected(true)}
-    >
-      {value}
-    </span>
-  );
-};
-
-const defaultColumn = {
-  Cell: EditableCell,
-};
-
-// Be sure to pass our updateMyData and the skipPageReset option
-function Table({ columns, data, updateMyData, skipPageReset }) {
-  // For this example, we're using pagination to illustrate how to stop
-  // the current page from resetting when our data changes
-  // Otherwise, nothing is different here.
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    page,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize },
-  } = useTable(
-    {
-      columns,
-      data,
-      defaultColumn,
-      // use the skipPageReset option to disable page resetting temporarily
-      autoResetPage: !skipPageReset,
-      // updateMyData isn't part of the API, but
-      // anything we put into these options will
-      // automatically be available on the instance.
-      // That way we can call this function from our
-      // cell renderer!
-      updateMyData,
-    },
-    usePagination,
-  );
-
-  // Render the UI for your table
-  return (
-    <>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {page.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="pagination">
-        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {'<<'}
-        </button>{' '}
-        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {'<'}
-        </button>{' '}
-        <button onClick={() => nextPage()} disabled={!canNextPage}>
-          {'>'}
-        </button>{' '}
-        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {'>>'}
-        </button>{' '}
-        <span>
-          Page{' '}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{' '}
-        </span>
-        <span>
-          | Go to page:{' '}
-          <input
-            type="number"
-            defaultValue={pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              gotoPage(page);
-            }}
-            style={{ width: '100px' }}
-          />
-        </span>{' '}
-        {/* eslint-disable-next-line jsx-a11y/no-onchange */}
-        <select
-          value={pageSize}
-          onChange={(e) => {
-            setPageSize(Number(e.target.value));
-          }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div>
-    </>
-  );
-}
-
 const ReactDataTableWidget = (props) => {
-  // Set our editable cell renderer as the default Cell renderer
   let { schema, value, onChange, id, csvexport, csvimport } = props;
 
   const intl = useIntl();
@@ -197,62 +54,57 @@ const ReactDataTableWidget = (props) => {
     return { Header: schema.properties[field].title, accessor: field };
   });
 
-  // Set our editable cell renderer as the default Cell renderer
   const tablecolumns = React.useMemo(
-    () => [
-      {
-        Header: 'React table header',
-        columns: header_columns,
-      },
-    ],
+    () => [...header_columns],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  // const tablecolumns = React.useMemo(() => columns, [columns]);
+  const [originalData] = React.useState(value);
+  const [hasModifiedData, setHasModifiedData] = React.useState(false);
+  const [selectedRow, setSelectedRow] = React.useState(0);
 
-  const [data, setData] = React.useState(() => value);
-  const [originalData] = React.useState(data);
-  const [skipPageReset, setSkipPageReset] = React.useState(false);
-
-  // We need to keep the table from resetting the pageIndex when we
-  // Update data. So we can keep track of that flag with a ref.
-
-  // When our cell renderer calls updateMyData, we'll use
-  // the rowIndex, columnId and new value to update the
-  // original data
-  const updateMyData = (rowIndex, columnId, updateValue) => {
-    // We also turn on the flag to not reset the page
-    setSkipPageReset(true);
-    setData((old) =>
-      old.map((row, index) => {
-        if (index === rowIndex) {
-          return {
-            ...old[rowIndex],
-            [columnId]: updateValue,
-          };
-        }
-        return row;
-      }),
-    );
+  const updateCell = (rowIndex, columnId, updateValue) => {
+    setHasModifiedData(true);
     const newvalue = value.map((v, i) =>
       i !== rowIndex ? v : { ...v, [columnId]: updateValue },
     );
     onChange(id, newvalue);
   };
 
-  // After data chagnes, we turn the flag back off
-  // so that if data actually changes when we're not
-  // editing it, the page is reset
-  React.useEffect(() => {
-    setSkipPageReset(false);
-  }, [data]);
+  const removeRow = (event, rowIndex) => {
+    setHasModifiedData(true);
+    if (event.type === 'click' || event.key === 'Enter') {
+      setSelectedRow(rowIndex);
+      const newvalue = value.filter((v, i) => i !== rowIndex);
+      onChange(id, newvalue);
+    }
+  };
 
-  // Let's add a data resetter/randomizer to help
-  // illustrate that flow...
-  const resetData = () => setData(originalData);
+  const addRowAfter = (event, rowIndex) => {
+    setHasModifiedData(true);
+    if (event.type === 'click' || event.key === 'Enter') {
+      let newRowValue = {};
+      schema.fieldsets[0].fields.forEach((field) => {
+        newRowValue[field] = '';
+      });
+      setSelectedRow(rowIndex + 1);
+      const newvalue = [
+        ...value.slice(0, rowIndex + 1),
+        { '@id': uuid(), ...newRowValue },
+        ...value.slice(rowIndex + 1),
+      ];
+      onChange(id, newvalue);
+    }
+  };
 
-  const csvcolumns = tablecolumns[0].columns.map((d) => {
+  const resetData = () => {
+    onChange(id, originalData);
+    setSelectedRow(0);
+    setHasModifiedData(false);
+  };
+
+  const csvcolumns = tablecolumns.map((d) => {
     return {
       label: d.accessor,
       key: d.accessor,
@@ -265,90 +117,104 @@ const ReactDataTableWidget = (props) => {
   });
 
   const { CSVReader } = useCSVReader();
-  const { CSVDownloader, Type } = useCSVDownloader();
   return (
-    <>
-      <button onClick={resetData}>Reset Data</button>
-      {csvexport && (
-        <CSVDownloader
-          type={Type.Button}
-          filename={'prepackaged-files.csv'}
-          config={{
-            delimiter: ';',
-            quoteChar: '"',
-          }}
-          data={data}
-        >
-          Download as CSV file
-        </CSVDownloader>
-      )}
+    <Segment basic textAlign="center">
+      <>
+        <Modal
+          trigger={
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              disabled={!hasModifiedData}
+            >
+              {intl.formatMessage(messages.undo_all_modifications)}
+            </Button>
+          }
+          header={intl.formatMessage(messages.undo_header)}
+          content={intl.formatMessage(messages.undo_message)}
+          actions={[
+            'Cancel',
+            {
+              key: 'ok',
+              content: 'OK',
+              positive: true,
+              onClick: () => {
+                resetData();
+              },
+            },
+          ]}
+        />
 
-      {csvimport && (
-        <CSVReader
-          onUploadAccepted={(results) => {
-            let newdatacount = 0;
+        {csvexport && (
+          <CSVLink
+            className="ui button"
+            filename={`${schema.title} export.csv`}
+            separator=";"
+            data={value}
+          >
+            {intl.formatMessage(messages.export_csv_file)}
+          </CSVLink>
+        )}
 
-            let newdata = results.data.map((item) => {
-              if (!item['@id']) {
-                newdatacount += 1;
-                return {
-                  ...item,
-                  '@id': uuid(),
-                };
-              }
-              return item;
-            });
-
-            let modifiedcount = newdata.length - newdatacount;
-
-            setData(newdata);
-            onChange(id, newdata);
-            toast.success(
-              <Toast
-                success
-                autoClose={5000}
-                content={`${intl.formatMessage(
-                  messages.csv_file_imported_correctly,
-                )} ${intl.formatMessage(
-                  messages.import_new_imported_item_count,
-                  {
-                    count: newdatacount,
-                  },
-                )} ${intl.formatMessage(messages.import_modified_item_count, {
-                  count: modifiedcount,
-                })}`}
-              />,
-            );
-          }}
-          config={{ header: true }}
-        >
-          {({
-            getRootProps,
-            acceptedFile,
-            ProgressBar,
-            getRemoveFileProps,
-          }) => (
-            <>
-              <div>
-                <button type="button" {...getRootProps()}>
+        {csvimport && (
+          <CSVReader
+            onUploadAccepted={(results) => {
+              let newdatacount = 0;
+              let newdata = results.data.map((item) => {
+                if (!item['@id']) {
+                  newdatacount += 1;
+                  return {
+                    ...item,
+                    '@id': uuid(),
+                  };
+                }
+                return item;
+              });
+              let modifiedcount = newdata.length - newdatacount;
+              onChange(id, newdata);
+              toast.success(
+                <Toast
+                  success
+                  autoClose={5000}
+                  content={`${intl.formatMessage(
+                    messages.csv_file_imported_correctly,
+                  )} ${intl.formatMessage(
+                    messages.import_new_imported_item_count,
+                    {
+                      count: newdatacount,
+                    },
+                  )} ${intl.formatMessage(messages.import_modified_item_count, {
+                    count: modifiedcount,
+                  })}`}
+                />,
+              );
+            }}
+            config={{ header: true }}
+          >
+            {({ getRootProps, ProgressBar }) => (
+              <>
+                <Button type="button" {...getRootProps()}>
                   {intl.formatMessage(messages.import_csv_file)}
-                </button>
-                <div>{acceptedFile && acceptedFile.name}</div>
-                <button {...getRemoveFileProps()}>Remove</button>
-              </div>
-              <ProgressBar />
-            </>
-          )}
-        </CSVReader>
-      )}
+                </Button>
+                <ProgressBar />
+              </>
+            )}
+          </CSVReader>
+        )}
+      </>
 
-      <Table
+      <EditableTable
         columns={tablecolumns}
-        data={data}
-        updateMyData={updateMyData}
-        skipPageReset={skipPageReset}
+        data={value}
+        updateCell={updateCell}
+        removeRow={removeRow}
+        addRowAfter={addRowAfter}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        schema={schema}
       />
-    </>
+    </Segment>
   );
 };
 
