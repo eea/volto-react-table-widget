@@ -14,10 +14,11 @@
 [![Bugs](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-react-table-widget-develop&metric=bugs)](https://sonarqube.eea.europa.eu/dashboard?id=volto-react-table-widget-develop)
 [![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-react-table-widget-develop&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-react-table-widget-develop)
 
+[Volto](https://github.com/plone/volto) add-on to provide a [react-table](https://react-table.tanstack.com/) based widget for Volto to use it with fields with a large set of values.
 
-[Volto](https://github.com/plone/volto) add-on to provide a [react-table](https://react-table.tanstack.com/) based widget for Volto to use it with fields with a large set of values. 
+The widget can be used like Volto's [ObjectListWidget](https://docs.voltocms.com/storybook/?path=/story/widgets-object-list-json--default&globals=measureEnabled:false), but it's more performant when you have a large set of values.
 
-The widget can be used like Volto's [ObjectListWidget](https://docs.voltocms.com/storybook/?path=/story/widgets-object-list-json--default&globals=measureEnabled:false), but it is more performant when you have a large set of values and provides CSV import and export using the powerwful [react-papaparse](https://www.npmjs.com/package/react-papaparse) library.
+It also provides a CSV import and export functionality using the powerwful [react-papaparse](https://www.npmjs.com/package/react-papaparse) library.
 
 ## Features
 
@@ -35,6 +36,7 @@ Demo GIF
    ```
 
 1. Start Plone backend
+
    ```
    docker run -d --name plone -p 8080:8080 -e SITE=Plone -e PROFILES="profile-plone.restapi:blocks" plone
    ```
@@ -53,25 +55,25 @@ Demo GIF
 
 1. Start Volto frontend
 
-* If you already have a volto project, just update `package.json`:
+- If you already have a volto project, just update `package.json`:
 
-   ```JSON
-   "addons": [
-       "@eeacms/volto-react-table-widget"
-   ],
+  ```JSON
+  "addons": [
+      "@eeacms/volto-react-table-widget"
+  ],
 
-   "dependencies": {
-       "@eeacms/volto-react-table-widget": "^1.0.0"
-   }
-   ```
+  "dependencies": {
+      "@eeacms/volto-react-table-widget": "^1.0.0"
+  }
+  ```
 
-* If not, create one:
+- If not, create one:
 
-   ```
-   npm install -g yo @plone/generator-volto
-   yo @plone/volto my-volto-project --addon @eeacms/volto-react-table-widget
-   cd my-volto-project
-   ```
+  ```
+  npm install -g yo @plone/generator-volto
+  yo @plone/volto my-volto-project --addon @eeacms/volto-react-table-widget
+  cd my-volto-project
+  ```
 
 1. Install new add-ons and restart Volto:
 
