@@ -19,7 +19,8 @@
   "dependencies": {
     "@plone/scripts": "*",
     "react-table": "*",
-    "react-papaparse": "*"
+    "react-papaparse": "*",
+    "react-csv": "*"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
