@@ -72,27 +72,29 @@ const ReactDataTableWidget = (props) => {
     onChange(id, newvalue);
   };
 
-  const removeRow = (event, rowIndex) => {
+  const removeRow = (event, rowIndex, pageIndex, pageSize) => {
     setHasModifiedData(true);
     if (event.type === 'click' || event.key === 'Enter') {
-      setSelectedRow(rowIndex);
-      const newvalue = value.filter((v, i) => i !== rowIndex);
+      setSelectedRow(pageIndex * pageSize + rowIndex);
+      const newvalue = value.filter(
+        (v, i) => i !== pageIndex * pageSize + rowIndex,
+      );
       onChange(id, newvalue);
     }
   };
 
-  const addRowAfter = (event, rowIndex) => {
+  const addRowAfter = (event, rowIndex, pageIndex, pageSize) => {
     setHasModifiedData(true);
     if (event.type === 'click' || event.key === 'Enter') {
       let newRowValue = {};
       schema.fieldsets[0].fields.forEach((field) => {
         newRowValue[field] = '';
       });
-      setSelectedRow(rowIndex + 1);
+      setSelectedRow(pageIndex * pageSize + rowIndex + 1);
       const newvalue = [
-        ...value.slice(0, rowIndex + 1),
+        ...value.slice(0, pageIndex * pageSize + rowIndex + 1),
         { '@id': uuid(), ...newRowValue },
-        ...value.slice(rowIndex + 1),
+        ...value.slice(pageIndex * pageSize + rowIndex + 1),
       ];
       onChange(id, newvalue);
     }

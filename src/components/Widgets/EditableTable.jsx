@@ -110,6 +110,7 @@ const EditableCell = ({
   setSelectedRow,
   schema,
   reactSelect,
+  state: { pageIndex, pageSize },
 }) => {
   const fieldSchema = { ...schema?.properties?.[id], id: id };
   const [value, setValue] = React.useState(initialValue);
@@ -122,7 +123,6 @@ const EditableCell = ({
       setValue(e.value);
     } else {
       setValue(e.map((value) => value.value));
-      console.log('e', e);
     }
   };
 
@@ -185,9 +185,6 @@ function EditableTable(props) {
     schema,
     reactSelect,
   } = props;
-  if (data.length === 0) {
-    addRowAfter({ key: 'Enter' }, 0);
-  }
   const {
     getTableProps,
     getTableBodyProps,
@@ -211,7 +208,13 @@ function EditableTable(props) {
     },
     usePagination,
   );
-
+  if (data.length === 0) {
+    addRowAfter({ key: 'Enter' }, 0, pageIndex, pageSize);
+  }
+  React.useEffect(() => {
+    gotoPage(pageIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
   // Render the UI for your table
   return (
     <>
@@ -233,7 +236,9 @@ function EditableTable(props) {
             prepareRow(row);
             return (
               <Table.Row
-                className={selectedRow === i ? 'selected-row' : ''}
+                className={
+                  selectedRow === pageIndex * pageSize + i ? 'selected-row' : ''
+                }
                 {...row.getRowProps()}
               >
                 {row.cells.map((cell) => {
@@ -246,8 +251,12 @@ function EditableTable(props) {
                 <Table.Cell>
                   <div className={'row-actions'}>
                     <span
-                      onClick={(e) => addRowAfter(e, i)}
-                      onKeyDown={(e) => addRowAfter(e, i)}
+                      onClick={(e) => {
+                        addRowAfter(e, i, pageIndex, pageSize);
+                      }}
+                      onKeyDown={(e) => {
+                        addRowAfter(e, i, pageIndex, pageSize);
+                      }}
                       tabIndex={0}
                       role="button"
                       className="row-action"
@@ -255,8 +264,8 @@ function EditableTable(props) {
                       <Icon name={plusSVG} size="23px" />
                     </span>
                     <span
-                      onClick={(e) => removeRow(e, i)}
-                      onKeyDown={(e) => removeRow(e, i)}
+                      onClick={(e) => removeRow(e, i, pageIndex, pageSize)}
+                      onKeyDown={(e) => removeRow(e, i, pageIndex, pageSize)}
                       tabIndex={0}
                       role="button"
                       className="row-action"
