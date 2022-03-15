@@ -32,7 +32,15 @@ const FieldEditor = (props) => {
   } = props;
   const Select = reactSelect.default;
 
-  const { type, choices, id, minimum, maximum, defaultValue } = fieldSchema;
+  const {
+    type,
+    choices,
+    id,
+    minimum,
+    maximum,
+    defaultValue,
+    isMulti,
+  } = fieldSchema;
   const intl = useIntl();
   const normalizedValue = normalizeValue(choices, value, intl);
   if (choices) {
@@ -50,6 +58,7 @@ const FieldEditor = (props) => {
         value={normalizedValue}
         className="react-table-select-field"
         theme={selectTheme}
+        isMulti={isMulti}
         components={{
           ...(choices?.length > 25 && {
             MenuList,
@@ -60,7 +69,7 @@ const FieldEditor = (props) => {
         }}
         options={options}
         styles={customSelectStyles}
-        onChange={onChangeSelect}
+        onChange={(e) => onChangeSelect(e, isMulti)}
         onBlur={onBlur}
       />
     );
@@ -108,8 +117,13 @@ const EditableCell = ({
     setValue(e.target.value);
   };
 
-  const onChangeSelect = (e) => {
-    setValue(e.value);
+  const onChangeSelect = (e, isMulti) => {
+    if (!isMulti) {
+      setValue(e.value);
+    } else {
+      setValue(e.map((value) => value.value));
+      console.log('e', e);
+    }
   };
 
   const onBlur = () => {
@@ -144,7 +158,13 @@ const EditableCell = ({
         setSelectedRow(index);
       }}
     >
-      {value || <>&nbsp;</>}
+      {!fieldSchema.isMulti ? (
+        value || <>&nbsp;</>
+      ) : value ? (
+        value.join(', ')
+      ) : (
+        <>&nbsp;</>
+      )}
     </span>
   );
 };
