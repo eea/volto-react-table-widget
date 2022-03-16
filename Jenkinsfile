@@ -4,7 +4,7 @@ pipeline {
   environment {
         GIT_NAME = "volto-react-table-widget"
         NAMESPACE = "@eeacms"
-        SONARQUBE_TAGS = "clms.land.copernicus.eu,volto.eea.europa.eu"
+        SONARQUBE_TAGS = "clms.land.copernicus.eu,demo.eea.europa.eu"
         DEPENDENCIES = ""
     }
 
