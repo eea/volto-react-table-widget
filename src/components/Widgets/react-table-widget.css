@@ -1,0 +1,48 @@
+.row-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.row-action {
+  margin: 0.5em;
+  cursor: pointer;
+}
+
+.editable-cell {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  max-width: 10em;
+  height: 100%;
+  text-overflow: ellipsis;
+}
+
+.selected-row {
+  background-color: #e3f4fa;
+}
+
+.react-table-pagination {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.selected-row
+  .ui.selection.dropdown:not(.multiple):not(.search)
+  > .dropdown.icon {
+  position: absolute;
+  right: 1em;
+}
+
+.selected-row .react-table-select-field {
+  min-width: 5.5em;
+}
+
+.selected-row .react-table-integer-field {
+  max-width: 4.5em;
+}
+
+.selected-row .react-table-text-field {
+  height: 3.7em;
+}
