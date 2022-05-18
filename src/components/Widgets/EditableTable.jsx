@@ -8,7 +8,7 @@ import {
 } from '@plone/volto/components/manage/Widgets/SelectStyling';
 import { Input, Pagination, Table } from 'semantic-ui-react';
 import { usePagination, useTable } from 'react-table';
-
+import { useSelector } from 'react-redux';
 import { Icon } from '@plone/volto/components';
 import React from 'react';
 import { compose } from 'redux';
@@ -20,13 +20,15 @@ import paginationLeftSVG from '@plone/volto/icons/left-key.svg';
 import paginationRightSVG from '@plone/volto/icons/right-key.svg';
 import plusSVG from '@plone/volto/icons/circle-plus.svg';
 import { useIntl } from 'react-intl';
-
+import DatetimeWidget from '@plone/volto/components/manage/Widgets/DatetimeWidget';
+import moment from 'moment';
 const FieldEditor = (props) => {
   const {
     fieldSchema,
     value,
     onChange,
     onChangeSelect,
+    onChangeDate,
     onBlur,
     reactSelect,
   } = props;
@@ -88,6 +90,17 @@ const FieldEditor = (props) => {
       />
     );
   }
+  if (type === 'date') {
+    return (
+      <DatetimeWidget
+        id={`field-${id}`}
+        title="date"
+        value={value || defaultValue}
+        onChange={onChangeDate}
+        onBlur={onBlur}
+      />
+    );
+  }
   return (
     <Input
       id={`field-${id}`}
@@ -113,6 +126,9 @@ const EditableCell = ({
   state: { pageIndex, pageSize },
 }) => {
   const fieldSchema = { ...schema?.properties?.[id], id: id };
+  const locale = useSelector((state) => state.intl.locale);
+  moment.locale(locale);
+
   const [value, setValue] = React.useState(initialValue);
   const onChange = (e) => {
     setValue(e.target.value);
@@ -124,6 +140,12 @@ const EditableCell = ({
     } else {
       setValue(e.map((value) => value.value));
     }
+  };
+
+  const onChangeDate = (e, dateValue) => {
+    // console.log(dateValue);
+    setValue(dateValue);
+
   };
 
   const onBlur = () => {
@@ -140,6 +162,7 @@ const EditableCell = ({
       value={value}
       onChange={onChange}
       onChangeSelect={onChangeSelect}
+      onChangeDate={onChangeDate}
       onBlur={onBlur}
       reactSelect={reactSelect}
     />
@@ -158,7 +181,7 @@ const EditableCell = ({
         setSelectedRow(index);
       }}
     >
-      {!fieldSchema.isMulti ? (
+      {fieldSchema.type === 'date' && value ? (moment(value).format('LLL')) : !fieldSchema.isMulti ? (
         value || <>&nbsp;</>
       ) : value ? (
         value.join(', ')
