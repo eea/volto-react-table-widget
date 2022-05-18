@@ -145,7 +145,6 @@ const EditableCell = ({
   const onChangeDate = (e, dateValue) => {
     // console.log(dateValue);
     setValue(dateValue);
-
   };
 
   const onBlur = () => {
@@ -181,7 +180,9 @@ const EditableCell = ({
         setSelectedRow(index);
       }}
     >
-      {fieldSchema.type === 'date' && value ? (moment(value).format('LLL')) : !fieldSchema.isMulti ? (
+      {fieldSchema.type === 'date' && value ? (
+        moment(value).format('LLL')
+      ) : !fieldSchema.isMulti ? (
         value || <>&nbsp;</>
       ) : value ? (
         value.join(', ')
