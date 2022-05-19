@@ -51,7 +51,7 @@ const ReactDataTableWidget = (props) => {
 
   const intl = useIntl();
   const header_columns = schema.fieldsets[0].fields.map((field) => {
-    return { Header: schema.properties[field].title, accessor: field };
+    return { Header: schema.properties[field]?.title, accessor: field };
   });
 
   const tablecolumns = React.useMemo(
