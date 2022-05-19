@@ -47,7 +47,16 @@ const messages = defineMessages({
 });
 
 const ReactDataTableWidget = (props) => {
-  let { schema, value, onChange, id, csvexport, csvimport, fieldSet } = props;
+  let {
+    schema,
+    value,
+    onChange,
+    id,
+    csvexport,
+    csvimport,
+    undomodifications,
+    fieldSet,
+  } = props;
 
   const intl = useIntl();
   const header_columns = schema.fieldsets[0].fields.map((field) => {
@@ -137,31 +146,33 @@ const ReactDataTableWidget = (props) => {
         </Grid.Row>
       </Grid>
       <Segment basic textAlign="center">
-        <Modal
-          trigger={
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              disabled={!hasModifiedData}
-            >
-              {intl.formatMessage(messages.undo_all_modifications)}
-            </Button>
-          }
-          header={intl.formatMessage(messages.undo_header)}
-          content={intl.formatMessage(messages.undo_message)}
-          actions={[
-            'Cancel',
-            {
-              key: 'ok',
-              content: 'OK',
-              positive: true,
-              onClick: () => {
-                resetData();
+        {undomodifications && (
+          <Modal
+            trigger={
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                disabled={!hasModifiedData}
+              >
+                {intl.formatMessage(messages.undo_all_modifications)}
+              </Button>
+            }
+            header={intl.formatMessage(messages.undo_header)}
+            content={intl.formatMessage(messages.undo_message)}
+            actions={[
+              'Cancel',
+              {
+                key: 'ok',
+                content: 'OK',
+                positive: true,
+                onClick: () => {
+                  resetData();
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        )}
 
         {csvexport && (
           <CSVLink
