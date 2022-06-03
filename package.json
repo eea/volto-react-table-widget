@@ -1,6 +1,6 @@
 {
   "name": "@eeacms/volto-react-table-widget",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "@eeacms/volto-react-table-widget: Volto add-on",
   "main": "src/index.js",
   "author": "European Environment Agency: CLMS Team",

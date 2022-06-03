@@ -1,6 +1,6 @@
 import './react-table-widget.css';
 
-import { Button, Modal, Segment } from 'semantic-ui-react';
+import { Button, Modal, Segment, Grid } from 'semantic-ui-react';
 import { defineMessages, useIntl } from 'react-intl';
 
 import { CSVLink } from 'react-csv';
@@ -47,11 +47,20 @@ const messages = defineMessages({
 });
 
 const ReactDataTableWidget = (props) => {
-  let { schema, value, onChange, id, csvexport, csvimport } = props;
+  let {
+    schema,
+    value,
+    onChange,
+    id,
+    csvexport,
+    csvimport,
+    undomodifications,
+    fieldSet,
+  } = props;
 
   const intl = useIntl();
   const header_columns = schema.fieldsets[0].fields.map((field) => {
-    return { Header: schema.properties[field].title, accessor: field };
+    return { Header: schema.properties[field]?.title, accessor: field };
   });
 
   const tablecolumns = React.useMemo(
@@ -120,33 +129,50 @@ const ReactDataTableWidget = (props) => {
 
   const { CSVReader } = useCSVReader();
   return (
-    <Segment basic textAlign="center">
-      <>
-        <Modal
-          trigger={
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              disabled={!hasModifiedData}
-            >
-              {intl.formatMessage(messages.undo_all_modifications)}
-            </Button>
-          }
-          header={intl.formatMessage(messages.undo_header)}
-          content={intl.formatMessage(messages.undo_message)}
-          actions={[
-            'Cancel',
-            {
-              key: 'ok',
-              content: 'OK',
-              positive: true,
-              onClick: () => {
-                resetData();
+    <div className="inline field">
+      <Grid>
+        <Grid.Row stretched>
+          <Grid.Column width={4}>
+            <div className="wrapper">
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control*/}
+              <label id={`fieldset-${fieldSet}-field-label-${id}`}>
+                {schema.title}
+              </label>
+            </div>
+          </Grid.Column>
+          <Grid.Column width={8}>
+            <p className="help">{schema.description}</p>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+      <Segment basic textAlign="center">
+        {undomodifications && (
+          <Modal
+            trigger={
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                disabled={!hasModifiedData}
+              >
+                {intl.formatMessage(messages.undo_all_modifications)}
+              </Button>
+            }
+            header={intl.formatMessage(messages.undo_header)}
+            content={intl.formatMessage(messages.undo_message)}
+            actions={[
+              'Cancel',
+              {
+                key: 'ok',
+                content: 'OK',
+                positive: true,
+                onClick: () => {
+                  resetData();
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        )}
 
         {csvexport && (
           <CSVLink
@@ -204,19 +230,19 @@ const ReactDataTableWidget = (props) => {
             )}
           </CSVReader>
         )}
-      </>
 
-      <EditableTable
-        columns={tablecolumns}
-        data={value}
-        updateCell={updateCell}
-        removeRow={removeRow}
-        addRowAfter={addRowAfter}
-        selectedRow={selectedRow}
-        setSelectedRow={setSelectedRow}
-        schema={schema}
-      />
-    </Segment>
+        <EditableTable
+          columns={tablecolumns}
+          data={value}
+          updateCell={updateCell}
+          removeRow={removeRow}
+          addRowAfter={addRowAfter}
+          selectedRow={selectedRow}
+          setSelectedRow={setSelectedRow}
+          schema={schema}
+        />
+      </Segment>
+    </div>
   );
 };
 
