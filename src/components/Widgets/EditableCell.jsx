@@ -22,13 +22,15 @@ export const EditableCell = ({
 
   const [value, setValue] = React.useState(initialValue);
 
-  const onBlur = () => {
-    updateCell(index, id, value);
-  };
-
   React.useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
+
+  React.useEffect(() => {
+    updateCell(index, id, value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   const { choices, defaultValue, isMulti } = fieldSchema;
   const intl = useIntl();
   const fieldType = getFieldType(fieldSchema, reactSelect);
@@ -40,7 +42,6 @@ export const EditableCell = ({
       {...fieldType.properties}
       value={getValue(fieldType.type, value, defaultValue, normalizedValue)}
       onChange={(...args) => onChangeFunction({ ...args, isMulti: isMulti })}
-      onBlur={onBlur}
     />
   ) : (
     <span
