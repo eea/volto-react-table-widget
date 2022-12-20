@@ -1,4 +1,4 @@
-import { setupBeforeEach, tearDownAfterEach } from '../support';
+import { setupBeforeEach, tearDownAfterEach } from '../support/e2e';
 
 describe('Blocks Tests', () => {
   beforeEach(setupBeforeEach);
