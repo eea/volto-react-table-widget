@@ -1,82 +1,22 @@
 import { Input } from 'semantic-ui-react';
-import DatetimeWidget from '@plone/volto/components/manage/Widgets/DatetimeWidget';
-import { map } from 'lodash';
-import {
-  ClearIndicator,
-  DropdownIndicator,
-  MenuList,
-  Option,
-  customSelectStyles,
-  selectTheme,
-} from '@plone/volto/components/manage/Widgets/SelectStyling';
 
+import config from '@plone/volto/registry';
 export const getFieldType = (fieldSchema, reactSelect) => {
   const Select = reactSelect.default;
-  const { title, type, choices, id, minimum, maximum, isMulti } = fieldSchema;
-  let fieldType = {
-    properties: {},
-    Field: Input,
-  };
-  if (choices) {
-    const options = [
-      ...map(choices, (option) => ({
-        value: option[0],
-        label:
-          // Fix "None" on the serializer, to remove when fixed in p.restapi
-          option[1] !== 'None' && option[1] ? option[1] : option[0],
-      })),
-    ];
-    return {
-      ...fieldType,
-      Field: Select,
-      type: 'select',
-      properties: {
-        options: options,
-        id: `field-${id}`,
-        className: 'react-table-select-field',
-        styles: customSelectStyles,
-        theme: selectTheme,
-        isMulti: isMulti,
-        components: {
-          ...(choices?.length > 25 && {
-            MenuList,
-          }),
-          DropdownIndicator,
-          ClearIndicator,
-          Option: Option,
-        },
-      },
-    };
-  }
-  if (type === 'number') {
-    return {
-      ...fieldType,
-      type: 'number',
-      Field: Input,
-      properties: {
-        id: `field-${id}`,
-        type: 'number',
-        className: 'react-table-integer-field',
-        min: minimum,
-        max: maximum,
-      },
-    };
-  }
-  if (type === 'date') {
-    return {
-      ...fieldType,
-      type: 'date',
-      Field: DatetimeWidget,
-      properties: {
-        id: `field-${id}`,
-        title: title,
-      },
-    };
+  const { id } = fieldSchema;
+  const widgets = config.settings.reactTableWidgets
+    .map((widget) => {
+      if (widget.condition(fieldSchema)) {
+        return widget.fieldSchema(fieldSchema, { Select });
+      }
+    })
+    .filter((rtw) => rtw?.properties);
+  if (widgets.length > 0) {
+    return widgets[0];
   }
   return {
-    ...fieldType,
-    type: 'string',
     Field: Input,
+    type: 'string',
     properties: {
       id: `field-${id}`,
       type: 'text',
