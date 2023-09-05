@@ -25,7 +25,30 @@
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
     "babel-plugin-transform-class-properties": "^6.24.1",
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "husky": "*",
+    "lint-staged": "13.1.4"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json}": [
+      "make lint-fix",
+      "make prettier-fix"
+    ],
+    "src/**/*.{jsx}": [
+      "make i18n"
+    ],
+    "theme/**/*.{css,less}": [
+      "make stylelint-fix"
+    ],
+    "src/**/*.{css,less}": [
+      "make stylelint-fix"
+    ],
+    "theme/**/*.overrides": [
+      "make stylelint-fix"
+    ],
+    "src/**/*.overrides": [
+      "make stylelint-fix"
+    ]
   },
   "scripts": {
     "release": "release-it",
@@ -42,6 +65,7 @@
     "lint:fix": "if [ -d ./project ]; then ./project/node_modules/eslint/bin/eslint.js --fix 'src/**/*.{js,jsx}'; else ../../../node_modules/eslint/bin/eslint.js --fix 'src/**/*.{js,jsx}'; fi",
     "i18n": "rm -rf build/messages && NODE_ENV=production i18n --addon",
     "cypress:run": "if [ -d ./project ]; then NODE_ENV=development ./project/node_modules/cypress/bin/cypress run; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress run; fi",
-    "cypress:open": "if [ -d ./project ]; then NODE_ENV=development ./project/node_modules/cypress/bin/cypress open; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress open; fi"
+    "cypress:open": "if [ -d ./project ]; then NODE_ENV=development ./project/node_modules/cypress/bin/cypress open; else NODE_ENV=development ../../../node_modules/cypress/bin/cypress open; fi",
+    "prepare": "husky install"
   }
 }
